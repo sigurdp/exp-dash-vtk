@@ -1,0 +1,13 @@
+<VTKFile type="vtkMultiBlockDataSet" version="1.0" byte_order="LittleEndian" header_type="UInt64">
+  <vtkMultiBlockDataSet>
+    <Block index="0" name="Base">
+      <DataSet index="0" name="FluidZone" file="HeatingCoil/HeatingCoil_0_0.vtu"/>
+      <DataSet index="1" name="SolidZone" file="HeatingCoil/HeatingCoil_1_0.vtu"/>
+    </Block>
+  </vtkMultiBlockDataSet>
+  <FieldData>
+    <DataArray type="Float64" Name="TimeValue" NumberOfTuples="1" format="binary" RangeMin="0" RangeMax="0">
+      CAAAAAAAAAAAAAAAAAAAAA==
+    </DataArray>
+  </FieldData>
+</VTKFile>
