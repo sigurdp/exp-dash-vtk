@@ -1,2 +1,6 @@
 dash
 dash_vtk
+dash-bootstrap-components
+vtk
+numpy
+pyvista
