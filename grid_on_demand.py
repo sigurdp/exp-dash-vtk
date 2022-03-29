@@ -19,9 +19,11 @@ from vtkmodules.vtkFiltersGeometry import vtkExplicitStructuredGridSurfaceFilter
 from vtkmodules.vtkFiltersGeneral import vtkShrinkFilter
 from vtkmodules.vtkFiltersCore import vtkExplicitStructuredGridCrop
 
-
 import numpy as np
 import pyvista as pv
+
+import grid_factory
+
 
 random.seed(42)
 
@@ -107,33 +109,10 @@ def _generate_grid(i_size, j_size, k_size, _n_clicks):
 
     print(f"Generating grid: {i_size}x{j_size}x{k_size}")
 
-    ni, nj, nk = i_size, j_size, k_size
-    si, sj, sk = 20, 10, 1
-
-    # create raw coordinate grid
-    grid_ijk = np.mgrid[:(ni+1)*si:si, :(nj+1)*sj:sj, :(nk+1)*sk:sk]
-
-    # repeat array along each Cartesian axis for connectivity
-    for axis in range(1, 4):
-        grid_ijk = grid_ijk.repeat(2, axis=axis)
-
-    # slice off unnecessarily doubled edge coordinates
-    grid_ijk = grid_ijk[:, 1:-1, 1:-1, 1:-1]
-
-    # reorder and reshape to VTK order
-    corners = grid_ijk.transpose().reshape(-1, 3)
-
-    dims = np.array([ni, nj, nk]) + 1
-
-    print("construction")
-    grid = pv.ExplicitStructuredGrid(dims, corners)
-    print("compute conn")
-    grid = grid.compute_connectivity()
-    print("compute conn flags")
-    grid.ComputeFacesConnectivityFlagsArray()
+    grid = grid_factory.create_explicit_structured_grid(i_size, j_size, k_size, 20, 10, 2)
 
     print("extract surf")
-    # !!! extract_surface() does not plat nice with ExplicitStructuredGrid
+    # !!! extract_surface() does not play nice with ExplicitStructuredGrid
     #polydata = grid.extract_surface()
 
     extractSkinFilter = vtkExplicitStructuredGridSurfaceFilter()
