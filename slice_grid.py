@@ -6,8 +6,11 @@ from dash_vtk.utils import to_mesh_state
 
 from vtkmodules.vtkFiltersGeometry import vtkExplicitStructuredGridSurfaceFilter
 from vtkmodules.vtkCommonDataModel import vtkPolyPlane
+from vtkmodules.vtkCommonDataModel import vtkCellLocator
 from vtkmodules.vtkFiltersCore import vtkCutter
 from vtkmodules.vtkFiltersCore import vtkImplicitPolyDataDistance 
+from vtkmodules.vtkFiltersCore import vtkImplicitPolyDataDistance 
+from vtkmodules.vtkCommonCore import vtkIdList 
 
 # Not yet available!
 #from vtkmodules.vtkFiltersCore import vtkExtractCellsAlongPolyLine
@@ -21,6 +24,19 @@ import grid_factory
 
 grid = grid_factory.create_explicit_structured_grid(5, 4, 3, 20.0, 10.0, 5.0)
 
+test_cell_blanking = True
+if test_cell_blanking:
+    cellLocator = vtkCellLocator()
+    cellLocator.SetDataSet(grid)
+    cellLocator.BuildLocator()
+    cellIds = vtkIdList()
+    cellLocator.FindCellsAlongLine((6.0, 6.0, 12.0), (67.0, 12.0, 12.0), 0.001, cellIds)
+    for i in range(cellIds.GetNumberOfIds()):
+        id = cellIds.GetId(i)
+        grid.BlankCell(id)
+
+
+
 extractSkinFilter = vtkExplicitStructuredGridSurfaceFilter()
 extractSkinFilter.SetInputData(grid)
 extractSkinFilter.Update()
@@ -33,7 +49,6 @@ polydata = extractSkinFilter.GetOutput()
 skin_mesh_state = to_mesh_state(polydata)
 
 z = 14.0
-
 line_verts = np.array([(-5.0, -1.0, z), (5.0, 5.0, z), (6.0, 5.0, z), (7.0, 4.0, z), (8.0, 9.0, z), (15.0, 12.0, z), (25.0, 23.0, z), (70.0, 31.0, z), (65.0, 15.0, z), (66.0, -2.0, z)])
 #line_verts = np.array([(-5.0, -1.0, z), (5.0, 5.0, z), (6.0, 5.0, z), (7.0, 4.0, z), (8.0, 9.0, z), (15.0, 12.0, z), (25.0, 23.0, z), (70.0, 31.0, z), (65.0, 15.0, z)])
 #line_verts = np.array([(5.0, 5.0, z), (6.0, 5.0, z), (7.0, 4.0, z), (8.0, 9.0, z), (15.0, 12.0, z), (25.0, 23.0, z), (70.0, 31.0, z), (65.0, 15.0, z)])
@@ -100,10 +115,11 @@ content = dash_vtk.View([
         property={
             "lighting": True,
             "edgeVisibility": True,
+            "opacity": 0.5,
             "color": [0.5, 0.5, 0.1],
             "lineWidth": 5,
             "pointSize": 5,
-            "representation": 1,    # 0=points, 1=wireframe, 2=surf
+            "representation": 2,    # 0=points, 1=wireframe, 2=surf
         }, 
         children=[
             dash_vtk.Mesh(state=skin_mesh_state)
